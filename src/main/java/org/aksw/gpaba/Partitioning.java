@@ -6,10 +6,27 @@ import java.util.Set;
  * @author Tommaso Soru {@literal tsoru@informatik.uni-leipzig.de}
  *
  */
-public interface Partitioning {
+public abstract class Partitioning {
 	
-	public String getName();
+	protected Graph graph;
+	protected int k;
+
+	public Partitioning(Graph graph, int k) {
+		this.graph = graph;
+		this.k = k;
+	}
+
+	public abstract String getName();
 	
-	public Set<Partition> compute();
+	public abstract Set<Partition> compute();
+	
+	public Graph getGraph() {
+		return graph;
+	}
+	
+	public int getK() {
+		return k;
+	}
+
 
 }
