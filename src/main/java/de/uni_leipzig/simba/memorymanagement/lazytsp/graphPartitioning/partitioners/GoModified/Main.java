@@ -47,7 +47,7 @@ public class Main {
 		initNodesEdges();
 	}
 	
-	private static void split(de.uni_leipzig.simba.memorymanagement.lazytsp.graphPartitioning.partitioners.GoModified.KLFM.Results res)
+	private static void split(KLFM.Results res)
 	{
 		 
 		for(int i=0;i<g.edges.length; i++)
@@ -58,7 +58,7 @@ public class Main {
 			}
 		}
 	}
-	private static void split(de.uni_leipzig.simba.memorymanagement.lazytsp.graphPartitioning.partitioners.GoModified.KLFM.Results res, Graph g2)
+	private static void split(KLFM.Results res, Graph g2)
 	{
 		 
 		for(int i=0;i<g.edges.length; i++)
