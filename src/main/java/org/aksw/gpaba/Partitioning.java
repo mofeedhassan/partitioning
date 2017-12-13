@@ -14,6 +14,7 @@ public abstract class Partitioning {
 	public Partitioning(Graph graph, int k) {
 		this.graph = graph;
 		this.k = k;
+		System.out.println("Started: " + this.getName());
 	}
 
 	public abstract String getName();

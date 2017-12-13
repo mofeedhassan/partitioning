@@ -5,7 +5,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class UnionFind {
+/**
+ * @author Andre Valdestilhas {@literal valdestilhas@informatik.uni-leipzig.de}
+ *
+ */
+public class WeightedUnionFind {
 	Map<String, String> parents = new HashMap<>();
 	Map<String, Integer> representantElements = new HashMap<>();
 
@@ -58,7 +62,7 @@ public class UnionFind {
 	public static Set<Set<String>> partitions(Map<PTSPNode, Set<PTSPNode>> pairs, int pThreshold) {
 		Set<Set<String>> setPartitions = new HashSet<Set<String>>();
 		int sumWeight = 0;
-		UnionFind groups = new UnionFind();
+		WeightedUnionFind groups = new WeightedUnionFind();
 		for (Map.Entry<PTSPNode, Set<PTSPNode>> entry : pairs.entrySet()) {
 			PTSPNode first = entry.getKey();
 			if (first.getWeight() >= pThreshold) {
@@ -73,7 +77,7 @@ public class UnionFind {
 					groups.union(pair, new PTSPNode("", 0));
 					
 					setPartitions.addAll(groups.getPartitions());
-					groups = new UnionFind();
+					groups = new WeightedUnionFind();
 					groups.union(first, new PTSPNode("", 0));
 					continue;
 				}
@@ -82,7 +86,7 @@ public class UnionFind {
 				sumWeight = +(first.getWeight() + pair.getWeight());
 				if (sumWeight >= pThreshold) {
 					setPartitions.addAll(groups.getPartitions());
-					groups = new UnionFind();
+					groups = new WeightedUnionFind();
 				}
 			}
 		}

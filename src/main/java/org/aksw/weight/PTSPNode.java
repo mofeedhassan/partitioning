@@ -1,5 +1,9 @@
 package org.aksw.weight;
 
+/**
+ * @author Andre Valdestilhas {@literal valdestilhas@informatik.uni-leipzig.de}
+ *
+ */
 public class PTSPNode {
 	private String label;
 	private int weight;
