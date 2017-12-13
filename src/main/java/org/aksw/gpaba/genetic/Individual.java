@@ -39,9 +39,9 @@ public class Individual implements Comparable<Individual> {
 		if (getClass() != obj.getClass())
 			return false;
 		Individual other = (Individual) obj;
-		if (genome != other.genome)
-			return false;
-		return true;
+		if( this == other )
+			return true;
+		return false;
 	}
 
 	@Override
@@ -51,7 +51,7 @@ public class Individual implements Comparable<Individual> {
 
 	@Override
 	public int compareTo(Individual o) {
-		return this.genome.compareTo(o.genome);
+		return this.hashCode() - o.hashCode();
 	}
 	
 }

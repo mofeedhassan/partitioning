@@ -6,6 +6,8 @@ import java.util.Set;
 import org.aksw.gpaba.genetic.GeneticPartitioning;
 
 /**
+ * GPABA = Graph Partitioning and Balancing Algorithm.
+ * 
  * @author Tommaso Soru {@literal tsoru@informatik.uni-leipzig.de}
  *
  */
@@ -14,7 +16,7 @@ public class GPABAMain {
 	public static void main(String[] args) throws FileNotFoundException {
 
 		String file = "graph.txt";
-		int k = 4;
+		int k = 3;
 
 		Graph g = FileParser.load(file);
 		System.out.println(g);
