@@ -8,18 +8,16 @@ package org.aksw.gpaba.genetic;
 public class Individual implements Comparable<Individual> {
 
 	private String genome;
-	private int fitness;
+	private double costFitness = Double.NaN;
+	private double balanceFitness = Double.NaN;
+	private double fitness = Double.NaN;
 	
 	public Individual(String genome) {
 		this.setGenome(genome);
 	}
 
-	public int getFitness() {
+	public double getFitness() {
 		return fitness;
-	}
-
-	public void setFitness(int fitness) {
-		this.fitness = fitness;
 	}
 
 	public String getGenome() {
@@ -44,14 +42,39 @@ public class Individual implements Comparable<Individual> {
 		return false;
 	}
 
+
 	@Override
 	public String toString() {
-		return "Individual [genome=" + genome + ", fitness=" + fitness + "]";
+		return "Individual [genome=" + genome + ", costFitness=" + costFitness
+				+ ", balanceFitness=" + balanceFitness + ", fitness=" + fitness
+				+ "]";
 	}
 
 	@Override
 	public int compareTo(Individual o) {
 		return this.hashCode() - o.hashCode();
+	}
+
+	private void updateFitness() {
+		this.fitness = Math.pow(this.costFitness, 2) + Math.pow(this.balanceFitness, 2);
+	}
+	
+	public double getCostFitness() {
+		return costFitness;
+	}
+
+	public void setCostFitness(double costFitness) {
+		this.costFitness = costFitness;
+		updateFitness();
+	}
+
+	public double getBalanceFitness() {
+		return balanceFitness;
+	}
+
+	public void setBalanceFitness(double balanceFitness) {
+		this.balanceFitness = balanceFitness;
+		updateFitness();
 	}
 	
 }

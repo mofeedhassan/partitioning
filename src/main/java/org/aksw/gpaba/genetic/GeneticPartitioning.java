@@ -3,8 +3,10 @@ package org.aksw.gpaba.genetic;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -15,6 +17,8 @@ import org.aksw.gpaba.Node;
 import org.aksw.gpaba.Partition;
 import org.aksw.gpaba.Partitioning;
 import org.aksw.gpaba.util.MapUtil;
+import org.apache.commons.math3.stat.descriptive.moment.Mean;
+import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
 /**
  * @author Tommaso Soru {@literal tsoru@informatik.uni-leipzig.de}
@@ -22,11 +26,15 @@ import org.aksw.gpaba.util.MapUtil;
  */
 public class GeneticPartitioning extends Partitioning {
 
-	public static final int POP_SIZE = 11;
+	public static final int POP_SIZE = 12;
 	public static final int EPOCHS = 100; // [1, N]
 	
 	public static final double SELECTION = 0.8; // [0.0, 1.0]
 	public static final double MUTATION = 0.1;
+	
+	// for fitness estimation
+	private double costFitExpValue = Double.NaN;
+	private double balanceFitExpValue = Double.NaN;
 
 	public GeneticPartitioning(Graph graph, int k) {
 		super(graph, k);
@@ -50,7 +58,7 @@ public class GeneticPartitioning extends Partitioning {
 		// build pool
 		Pool pool = new Pool(POP_SIZE, k, graph.getNodes().size());
 		pool.create();
-		Map<Individual, Integer> map = fit(pool);
+		Map<Individual, Double> map = fit(pool);
 		print(map, 1);
 		bestFitnessWriter.println("1\t" + getBestIndividual(map).getFitness() + "\t" +
 				getAverageFitness(map));
@@ -82,8 +90,8 @@ public class GeneticPartitioning extends Partitioning {
 					int randType = (int)(pool.getK() * Math.random());
 					char newGene = (char)(randType + 'A');
 //					System.out.println(genome);
-//					System.out.println("mutating gene "+randGene+" from "+genome.charAt(randGene) + 
-//							" to " + newGene);
+					System.out.println("mutating gene "+randGene+" from "+genome.charAt(randGene) + 
+							" to " + newGene);
 					genome = genome.substring(0, randGene) + newGene + genome.substring(randGene + 1);
 //					System.out.println(genome);
 				}
@@ -124,14 +132,14 @@ public class GeneticPartitioning extends Partitioning {
 		return new HashSet<>(parts.values());
 	}
 	
-	private double getAverageFitness(Map<Individual, Integer> map) {
+	private double getAverageFitness(Map<Individual, Double> map) {
 		double avg = 0.0;
-		for(Integer v : map.values())
+		for(Double v : map.values())
 			avg += v;
 		return avg / map.size();
 	}
 
-	private Individual getBestIndividual(Map<Individual, Integer> map) {
+	private Individual getBestIndividual(Map<Individual, Double> map) {
 		return map.keySet().iterator().next();
 	}
 
@@ -150,7 +158,7 @@ public class GeneticPartitioning extends Partitioning {
 			pool.removeIndividual(ind);
 	}
 
-	private void print(Map<Individual, Integer> map, int epoch) {
+	private void print(Map<Individual, Double> map, int epoch) {
 		System.out.println("=== EPOCH: " + epoch + " ===");
 		System.out.println("iterating on " + map.size() + " individuals");
 		for (Individual ind : map.keySet())
@@ -161,9 +169,9 @@ public class GeneticPartitioning extends Partitioning {
 		this.graph = graph;
 	}
 	
-	public Map<Individual, Integer> sort(Pool pool) {
+	public Map<Individual, Double> sort(Pool pool) {
 
-		TreeMap<Individual, Integer> map = new TreeMap<>();
+		TreeMap<Individual, Double> map = new TreeMap<>();
 
 		// for each individual...
 		for (Individual ind : pool.getIndividuals()) {
@@ -175,32 +183,79 @@ public class GeneticPartitioning extends Partitioning {
 	}
 
 
-	public Map<Individual, Integer> fit(Pool pool) {
+	public Map<Individual, Double> fit(Pool pool) {
 
-		TreeMap<Individual, Integer> map = new TreeMap<>();
+		TreeMap<Individual, Double> map = new TreeMap<>();
+		StandardDeviation stdev = new StandardDeviation();
+		Mean mean = new Mean();
 
+		ArrayList<Double> costFits = new ArrayList<>();
+		ArrayList<Double> balanceFits = new ArrayList<>();
+		
 		// for each individual...
 		for (Individual ind : pool.getIndividuals()) {
 			String genome = ind.getGenome();
-			int fitness = 0;
-			// for each edge in the graph...
+			double costFitness = 0;
+			
+			// compute edge-related fitness
 			for (Edge e : graph.getEdges()) {
 				// get node1 and node2
 				long node1id = e.getNode1().getId();
 				long node2id = e.getNode2().getId();
 				// if they belong to different partitions, count weight
-				char part1 = genome.charAt((int)(node1id - 1)); // they start from 1
-				char part2 = genome.charAt((int)(node2id - 1)); // they start from 1
+				char part1 = genome.charAt((int)(node1id - 1)); // IDs start from 1
+				char part2 = genome.charAt((int)(node2id - 1)); // IDs start from 1
 				if (part1 != part2)
-					fitness += e.getWeight();
+					costFitness += e.getWeight();
 			}
-			ind.setFitness(fitness);
-//			System.out.println(ind);
-			map.put(ind, fitness);
+			costFits.add(costFitness);
+			ind.setCostFitness(costFitness);
+			
+			// compute node-related fitness
+			double[] partWeights = new double[k];
+			for(int i=0; i<genome.length(); i++) {
+				// get partition number of the ith node 
+				int part = (int)(genome.charAt(i) - 'A');
+				partWeights[part] += graph.getNodeByID((long)(i + 1)).getWeight();
+			}
+			for(double w : partWeights) {
+				System.out.println("Weight: "+w);
+			}
+			// graph balance is inv.prop. to partition weight variance
+			double balanceFitness = stdev.evaluate(partWeights);
+			balanceFits.add(balanceFitness);
+			ind.setBalanceFitness(balanceFitness);
+			System.out.println(balanceFitness);
+			System.out.println("--");
+			
+		}
+
+		if(Double.isNaN(costFitExpValue)) {
+			costFitExpValue = mean.evaluate(toDouble(costFits));
+			System.out.println("costFitExpValue="+costFitExpValue);
+		}
+		if(Double.isNaN(balanceFitExpValue)) {
+			balanceFitExpValue = mean.evaluate(toDouble(balanceFits));
+			System.out.println("balanceFitExpValue="+balanceFitExpValue);
 		}
 		
+		for(Individual ind : pool.getIndividuals()) {
+			ind.setCostFitness(ind.getCostFitness() / costFitExpValue);
+			ind.setBalanceFitness(ind.getBalanceFitness() / balanceFitExpValue);
+			map.put(ind, ind.getFitness());
+		}
+
 		// sort the map by value (asc)
 		return MapUtil.sortByValue(map);
 	}
 
+	private double[] toDouble(List<Double> doubles) {
+		 double[] target = new double[doubles.size()];
+		 for (int i = 0; i < target.length; i++) {
+		    target[i] = doubles.get(i).doubleValue();  // java 1.4 style
+		    // or:
+		    target[i] = doubles.get(i);                // java 1.5+ style (outboxing)
+		 }
+		 return target;
+	}
 }
