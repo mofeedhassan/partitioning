@@ -22,8 +22,8 @@ public class GPABAMain {
 		Graph g = FileParser.load(file);
 		System.out.println(g);
 
-//		Partitioning gp = new GeneticPartitioning(g, k);
-		Partitioning gp = new WeightedUFPartitioning(g, k);
+		Partitioning gp = new GeneticPartitioning(g, k);
+//		Partitioning gp = new WeightedUFPartitioning(g, k);
 		Set<Partition> parts = gp.compute();
 		System.out.println(parts);
 

@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.PrimitiveIterator.OfInt;
 import java.util.Set;
 
-import org.aksw.gpaba.util.MapUtil;
-
 /**
  * @author Tommaso Soru {@literal tsoru@informatik.uni-leipzig.de}
  *

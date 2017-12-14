@@ -1,5 +1,6 @@
 package org.aksw.gpaba;
 
+import java.util.HashMap;
 import java.util.Set;
 
 /**
@@ -8,12 +9,20 @@ import java.util.Set;
  */
 public class Graph {
 	
+	private HashMap<Long, Node> nodesMap;
 	private Set<Node> nodes;
 	private Set<Edge> edges;
 	
 	public Graph(Set<Node> nodes, Set<Edge> edges) {
 		this.setNodes(nodes);
 		this.setEdges(edges);
+		nodesMap = new HashMap<>();
+		for(Node n : nodes)
+			nodesMap.put(n.getId(), n);
+	}
+	
+	public Node getNodeByID(Long id) {
+		return nodesMap.get(id);
 	}
 
 	public Set<Node> getNodes() {
