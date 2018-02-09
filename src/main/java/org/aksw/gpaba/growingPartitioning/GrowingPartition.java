@@ -45,5 +45,10 @@ public class GrowingPartition  implements Partition{
 		sb.append("\n");
 		return sb.toString();
 	}
+	@Override
+	public int getSize() {
+		// TODO Auto-generated method stub
+		return nodesOnEDge.size()+nodesNotOnEdge.size();
+	}
 	
 }

@@ -24,5 +24,12 @@ public class GeneticPartition implements Partition {
 	public String toString() {
 		return "Partition [nodes=" + nodes + "]";
 	}
+
+	@Override
+	public int getSize() {
+		// TODO Auto-generated method stub
+		return nodes.size();
+	}
+	
 	
 }

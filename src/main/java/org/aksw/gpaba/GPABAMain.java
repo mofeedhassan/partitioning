@@ -4,6 +4,8 @@ import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.aksw.gpaba.genetic.GeneticPartitioning;
 import org.aksw.gpaba.growingPartitioning.GrowingPartition;
@@ -17,6 +19,7 @@ import org.aksw.weight.WeightedUFPartitioning;
  *
  */
 public class GPABAMain {
+	static Logger log = Logger.getLogger("gpaba");
 	public enum Algorithm{
 		GENETIC,GROWING,UNIONFIND
 	}
@@ -24,6 +27,7 @@ public class GPABAMain {
 	public static void main(String[] args) throws FileNotFoundException {
 		
 		Algorithm algorithm = Algorithm.GENETIC;
+		log.log(Level.INFO, "The partition algorithm is {0}",algorithm);
 		runAlgorithm(algorithm);
 
 	}
@@ -34,6 +38,9 @@ public class GPABAMain {
 		if(g!=null && k <= g.size())
 		{
 			System.out.println(g);
+			log.log(Level.INFO, "The graph size = {0}",g.size());
+			log.log(Level.INFO, "The required partitions = {0}",k);
+
 			Partitioning gp = null;
 			switch(algorithm)
 			{
@@ -46,7 +53,19 @@ public class GPABAMain {
 			default: System.out.println("Algorithm is not available");
 				
 			}
+			long startTime = System.currentTimeMillis();
+			log.log(Level.INFO, "The start time = {0}",startTime);
+			
 			Set<Partition> parts = gp.compute();
+			
+			log.log(Level.INFO, "The end time = {0}",System.currentTimeMillis());
+			log.log(Level.INFO, "The elapsed time = {0} Seconds", (System.currentTimeMillis() - startTime)/1000);
+			log.log(Level.INFO, "The Number of nodes per partition ");
+			int i=1;
+			for (Partition partition : parts) {
+				log.log(Level.INFO, "The partition number "+(i++)+" = {0} Node",partition.getSize());
+			}
+
 			System.out.println(parts); 
 		}
 	}
