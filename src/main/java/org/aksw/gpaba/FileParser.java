@@ -25,7 +25,7 @@ public class FileParser {
 		
 		while(in.hasNextLine()) {
 			
-			String[] data = in.nextLine().split("\t");
+			String[] data = in.nextLine().split("\\s");
 			
 			double w = Double.parseDouble(data[1]);
 			
@@ -40,6 +40,10 @@ public class FileParser {
 				
 				Edge e = new Edge(c, w, nodes.get(id1), nodes.get(id2));
 				edges.add(e);
+				
+				//set edges for both nodes
+				nodes.get(id1).getEdges().add(e);
+				nodes.get(id2).getEdges().add(e);
 				
 			} else {
 				// node

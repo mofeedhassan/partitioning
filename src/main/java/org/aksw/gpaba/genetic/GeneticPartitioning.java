@@ -15,6 +15,7 @@ import org.aksw.gpaba.Edge;
 import org.aksw.gpaba.Graph;
 import org.aksw.gpaba.Node;
 import org.aksw.gpaba.Partition;
+import org.aksw.gpaba.GeneticPartition;
 import org.aksw.gpaba.Partitioning;
 import org.aksw.gpaba.util.MapUtil;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
@@ -57,27 +58,27 @@ public class GeneticPartitioning extends Partitioning {
 		
 		// build pool
 		Pool pool = new Pool(POP_SIZE, k, graph.getNodes().size());
-		pool.create();
-		Map<Individual, Double> map = fit(pool);
+		pool.create();//create set/pool of individuals
+		Map<Individual, Double> map = fit(pool);//calculate for the individuals their min-cut cost,, balance cost then fitness values, 
 		print(map, 1);
 		bestFitnessWriter.println("1\t" + getBestIndividual(map).getFitness() + "\t" +
 				getAverageFitness(map));
 		
 		
 		// apply genetic operators
-		for (int epoch = 2; epoch <= EPOCHS; epoch++) {
+		for (int epoch = 2; epoch <= EPOCHS; epoch++) {//epoch = generations level
 			
 			// natural selection = best population survives
 			naturalSelection(pool);
 			
 			// newborns
-			int newborns = pool.getSize() - pool.getIndividuals().size();
+			int newborns = pool.getSize() - pool.getIndividuals().size();//number of empt places in the pool to get new born genes
 			System.out.println("newborns: " + newborns);
 			
 			// for each newborn
 			for (int n=0; n<newborns; n++) {
 				
-				// crossover
+				// crossover (new born is created from mix between two parents gene string)
 				int randCut = (int)(pool.getNumGenes() * Math.random());
 				Individual parent1 = pool.getIndividuals().get(2 * n);
 				Individual parent2 = pool.getIndividuals().get(2 * n + 1);
@@ -85,7 +86,7 @@ public class GeneticPartitioning extends Partitioning {
 						parent2.getGenome().substring(randCut);
 				
 				// mutation
-				if(Math.random() < MUTATION) {
+				if(Math.random() < MUTATION) {//based on randomization, will the new born be mutated or not
 					int randGene = (int)(pool.getNumGenes() * Math.random());
 					int randType = (int)(pool.getK() * Math.random());
 					char newGene = (char)(randType + 'A');
@@ -112,19 +113,19 @@ public class GeneticPartitioning extends Partitioning {
 			
 		}
 		
-		// get best individual
+		// get best individual(best of all ages)
 		Individual best = getBestIndividual(map);
 		
 		// set up empty partitions
 		HashMap<Character, Partition> parts = new HashMap<>();
 		for (int i=0; i<k; i++)
-			parts.put((char)('A' + i), new Partition());
+			parts.put((char)('A' + i), new GeneticPartition());
 		
 		// assign nodes to partitions
 		for (int i=0; i<best.getGenome().length(); i++) {
 //			Node ith = getIthNode(i, graph.getNodes());
 			Node ith = graph.getNodeByID((long)(i + 1)); // they start from 1
-			parts.get(best.getGenome().charAt(i)).addNode( ith );
+			((GeneticPartition) parts.get(best.getGenome().charAt(i))).addNode( ith );
 		}
 		
 		bestFitnessWriter.close();
@@ -143,7 +144,7 @@ public class GeneticPartitioning extends Partitioning {
 		return map.keySet().iterator().next();
 	}
 
-	private void naturalSelection(Pool pool) {
+	private void naturalSelection(Pool pool) {//kill ind having less than x fitness
 		int quantile = 0;
 		Set<Individual> dying = new HashSet<>();
 		for(Individual ind : sort(pool).keySet()) {
@@ -197,7 +198,7 @@ public class GeneticPartitioning extends Partitioning {
 			String genome = ind.getGenome();
 			double costFitness = 0;
 			
-			// compute edge-related fitness
+			// compute edge-related fitness(min-cut)
 			for (Edge e : graph.getEdges()) {
 				// get node1 and node2
 				long node1id = e.getNode1().getId();
@@ -208,10 +209,10 @@ public class GeneticPartitioning extends Partitioning {
 				if (part1 != part2)
 					costFitness += e.getWeight();
 			}
-			costFits.add(costFitness);
+			costFits.add(costFitness);//cost fitness is the total weight between each partition (cut total cost)
 			ind.setCostFitness(costFitness);
 			
-			// compute node-related fitness
+			// compute node-related fitness (balancing)
 			double[] partWeights = new double[k];
 			for(int i=0; i<genome.length(); i++) {
 				// get partition number of the ith node 
@@ -229,18 +230,18 @@ public class GeneticPartitioning extends Partitioning {
 			System.out.println("--");
 			
 		}
-
+		//get average min-cut cost
 		if(Double.isNaN(costFitExpValue)) {
 			costFitExpValue = mean.evaluate(toDouble(costFits));
 			System.out.println("costFitExpValue="+costFitExpValue);
 		}
-		if(Double.isNaN(balanceFitExpValue)) {
+		if(Double.isNaN(balanceFitExpValue)) {//get averae balance cost
 			balanceFitExpValue = mean.evaluate(toDouble(balanceFits));
 			System.out.println("balanceFitExpValue="+balanceFitExpValue);
 		}
-		
+		//normalize
 		for(Individual ind : pool.getIndividuals()) {
-			ind.setCostFitness(ind.getCostFitness() / costFitExpValue);
+			ind.setCostFitness(ind.getCostFitness() / costFitExpValue);//in both setcost and balance the fitness is updated
 			ind.setBalanceFitness(ind.getBalanceFitness() / balanceFitExpValue);
 			map.put(ind, ind.getFitness());
 		}

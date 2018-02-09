@@ -38,10 +38,10 @@ public class Pool {
 		inds.remove(ind);
 	}
 	
-	public void create() {
+	public void create() {//the method creates different genomes for individuals and add them to the individual set
 
 		ArrayList<String> types = new ArrayList<>();
-		for (char c = 'A'; c <= 'A' + k - 1; c++)
+		for (char c = 'A'; c <= 'A' + k - 1; c++)//create groups/partitions labels starting from A
 			types.add(String.valueOf(c));
 
 		System.out.println("types=" + types);
@@ -50,12 +50,12 @@ public class Pool {
 		while ( inds.size() < size ) {
 			String genome = "";
 			// for each gene
-			for (int j = 0; j < numGenes; j++) {
-				String gene = types.get((int) (k * Math.random()));
+			for (int j = 0; j < numGenes; j++) {//create a random distributed genes for the genome 
+				String gene = types.get((int) (k * Math.random()));//create random parition selection that the corresponding gene (node) should belongs to
 				genome += gene;
 			}
 //			long start = System.nanoTime();
-			boolean valid = validate(genome);
+			boolean valid = validate(genome);//check if in the generated genome if each gene is assigned and all gene values (A/B) are represented
 //			System.out.println("runtime="+(System.nanoTime()-start));
 			if(!valid) {
 				System.out.println("rejected: "+genome);
