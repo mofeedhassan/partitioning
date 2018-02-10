@@ -15,7 +15,9 @@ import org.aksw.weight.WeightedUFPartitioning;
 /**
  * GPABA = Graph Partitioning and Balancing Algorithm.
  * 
+ * @author Mofeed Hassan {@literal mounir@informatik.uni-leipzig.de}
  * @author Tommaso Soru {@literal tsoru@informatik.uni-leipzig.de}
+ * @author Andre Valdestilhas {@literal valdestilhas@informatik.uni-leipzig.de}
  *
  */
 public class GPABAMain {
@@ -65,8 +67,7 @@ public class GPABAMain {
 			for (Partition partition : parts) {
 				log.log(Level.INFO, "The partition number "+(i++)+" = {0} Node",partition.getSize());
 			}
-
-			System.out.println(parts); 
+			
 		}
 	}
 /*	public static void testGrowing()

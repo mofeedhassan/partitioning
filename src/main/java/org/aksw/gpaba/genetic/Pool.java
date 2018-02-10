@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.PrimitiveIterator.OfInt;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.Set;
 
 /**
@@ -11,7 +13,9 @@ import java.util.Set;
  *
  */
 public class Pool {
-
+	
+	static Logger log = Logger.getLogger("gpaba");
+	
 	// number of individuals
 	private int size;
 
@@ -44,7 +48,7 @@ public class Pool {
 		for (char c = 'A'; c <= 'A' + k - 1; c++)//create groups/partitions labels starting from A
 			types.add(String.valueOf(c));
 
-		System.out.println("types=" + types);
+		log.log(Level.FINE, "types=" + types);
 
 		// for each individual
 		while ( inds.size() < size ) {
@@ -58,12 +62,12 @@ public class Pool {
 			boolean valid = validate(genome);//check if in the generated genome if each gene is assigned and all gene values (A/B) are represented
 //			System.out.println("runtime="+(System.nanoTime()-start));
 			if(!valid) {
-				System.out.println("rejected: "+genome);
+				log.log(Level.FINE, "rejected: "+genome);
 				continue;
 			}
 			Individual ind = new Individual(genome);
 			addIndividual(ind);
-			System.out.println(inds.size() + " => " + genome);
+			log.log(Level.FINE, inds.size() + " => " + genome);
 		}
 
 	}

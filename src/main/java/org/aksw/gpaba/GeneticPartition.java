@@ -11,6 +11,10 @@ public class GeneticPartition implements Partition {
 	
 	private Set<Node> nodes;
 
+	public Set<Node> getNodes() {
+		return nodes;
+	}
+
 	public GeneticPartition() {
 		super();
 		this.nodes = new HashSet<>();

@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.aksw.gpaba.Edge;
 import org.aksw.gpaba.Graph;
@@ -27,7 +29,9 @@ import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
  */
 public class GeneticPartitioning extends Partitioning {
 
-	public static final int POP_SIZE = 12;
+	static Logger log = Logger.getLogger("gpaba");
+	
+	public static final int POP_SIZE = 50;
 	public static final int EPOCHS = 100; // [1, N]
 	
 	public static final double SELECTION = 0.8; // [0.0, 1.0]
@@ -73,7 +77,7 @@ public class GeneticPartitioning extends Partitioning {
 			
 			// newborns
 			int newborns = pool.getSize() - pool.getIndividuals().size();//number of empt places in the pool to get new born genes
-			System.out.println("newborns: " + newborns);
+			log.log(Level.FINE, "newborns: " + newborns);
 			
 			// for each newborn
 			for (int n=0; n<newborns; n++) {
@@ -90,11 +94,11 @@ public class GeneticPartitioning extends Partitioning {
 					int randGene = (int)(pool.getNumGenes() * Math.random());
 					int randType = (int)(pool.getK() * Math.random());
 					char newGene = (char)(randType + 'A');
-//					System.out.println(genome);
-					System.out.println("mutating gene "+randGene+" from "+genome.charAt(randGene) + 
+					log.log(Level.FINEST, "Mutation, before: " + genome);
+					log.log(Level.FINE, "mutating gene "+randGene+" from "+genome.charAt(randGene) + 
 							" to " + newGene);
 					genome = genome.substring(0, randGene) + newGene + genome.substring(randGene + 1);
-//					System.out.println(genome);
+					log.log(Level.FINEST, "Mutation, after: " + genome);
 				}
 				
 				if(!pool.validate(genome)) {
@@ -148,9 +152,9 @@ public class GeneticPartitioning extends Partitioning {
 		int quantile = 0;
 		Set<Individual> dying = new HashSet<>();
 		for(Individual ind : sort(pool).keySet()) {
-//			System.out.println(quantile + " >= " + SELECTION * pool.getSize());
+			log.log(Level.FINEST, quantile + " >= " + SELECTION * pool.getSize());
 			if(quantile >= SELECTION * pool.getSize()) {
-				System.out.println("removing: "+ind);
+				log.log(Level.FINE, "removing: "+ind);
 				dying.add(ind);
 			}
 			quantile++;
@@ -160,10 +164,10 @@ public class GeneticPartitioning extends Partitioning {
 	}
 
 	private void print(Map<Individual, Double> map, int epoch) {
-		System.out.println("=== EPOCH: " + epoch + " ===");
-		System.out.println("iterating on " + map.size() + " individuals");
+		log.log(Level.FINE, "=== EPOCH: " + epoch + " ===");
+		log.log(Level.FINE, "iterating on " + map.size() + " individuals");
 		for (Individual ind : map.keySet())
-			System.out.println(ind);
+			log.log(Level.FINE, ind.toString());
 	}
 
 	public void setGraph(Graph graph) {
@@ -220,24 +224,24 @@ public class GeneticPartitioning extends Partitioning {
 				partWeights[part] += graph.getNodeByID((long)(i + 1)).getWeight();
 			}
 			for(double w : partWeights) {
-				System.out.println("Weight: "+w);
+				log.log(Level.FINE, "Weight: "+w);
 			}
 			// graph balance is inv.prop. to partition weight variance
 			double balanceFitness = stdev.evaluate(partWeights);
 			balanceFits.add(balanceFitness);
 			ind.setBalanceFitness(balanceFitness);
-			System.out.println(balanceFitness);
-			System.out.println("--");
+			log.log(Level.FINE, String.valueOf(balanceFitness));
+			log.log(Level.FINE, "--");
 			
 		}
 		//get average min-cut cost
 		if(Double.isNaN(costFitExpValue)) {
 			costFitExpValue = mean.evaluate(toDouble(costFits));
-			System.out.println("costFitExpValue="+costFitExpValue);
+			log.log(Level.FINE, "costFitExpValue="+costFitExpValue);
 		}
 		if(Double.isNaN(balanceFitExpValue)) {//get averae balance cost
 			balanceFitExpValue = mean.evaluate(toDouble(balanceFits));
-			System.out.println("balanceFitExpValue="+balanceFitExpValue);
+			log.log(Level.FINE, "balanceFitExpValue="+balanceFitExpValue);
 		}
 		//normalize
 		for(Individual ind : pool.getIndividuals()) {
