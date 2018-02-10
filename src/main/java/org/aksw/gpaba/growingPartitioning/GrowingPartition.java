@@ -8,6 +8,7 @@ import org.aksw.gpaba.Partition;
 public class GrowingPartition implements Partition {
 	
 	int partitionId;
+	double totalSize=0;
 	Set<Long> nodesNotOnEdge = null;
 	Set<Long> nodesOnEDge = null;
 
@@ -17,12 +18,14 @@ public class GrowingPartition implements Partition {
 		nodesOnEDge = new HashSet<>();
 	}
 
-	public void addToOnEdgeNodsNode(long node) {
+	public void addToOnEdgeNodsNode(long node, double nodeWeight) {
 		nodesOnEDge.add(node);
+		totalSize+=nodeWeight;
 	}
 
-	public void addToNotOnEdgeNodsNode(long node) {
+	public void addToNotOnEdgeNodsNode(long node, double nodeWeight) {
 		nodesNotOnEdge.add(node);
+		totalSize+=nodeWeight;
 	}
 
 	public Set<Long> getNodesOnEdge() {
@@ -31,6 +34,11 @@ public class GrowingPartition implements Partition {
 
 	public Set<Long> getNodesNotOnEdge() {
 		return nodesNotOnEdge;
+	}
+	public Set<Long> getNodes(){
+		Set<Long> tmp = new HashSet<>(nodesOnEDge);
+		tmp.addAll(nodesNotOnEdge);
+		return new HashSet<Long>(tmp);
 	}
 
 	@Override
@@ -56,8 +64,7 @@ public class GrowingPartition implements Partition {
 	
 	@Override
 	public int getSumOfNodesWeights() {
-		// TODO Auto-generated method stub
-		return 0;
+		return (int)totalSize; //won't affect thing as weight all are in integer
 	}
 	
 }

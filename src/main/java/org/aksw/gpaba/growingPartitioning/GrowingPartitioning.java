@@ -48,7 +48,7 @@ public class GrowingPartitioning extends Partitioning{
 		for(int i=1;i<=k;i++)
 		{
 			partitions.put(i, new GrowingPartition(i));
-			partitions.get(i).addToOnEdgeNodsNode(seedsList.get(i-1));
+			partitions.get(i).addToOnEdgeNodsNode(seedsList.get(i-1), graph.getNodeByID(seedsList.get(i-1)).getWeight());// add the node and pass its weight (got from teh graph) to be accumulated inside the partition
 			nodeIsAssigned.put(seedsList.get(i-1), true);
 		}
 		System.out.println(this);
@@ -59,7 +59,7 @@ public class GrowingPartitioning extends Partitioning{
 			for(int partitionId=1;partitionId<=k;partitionId++)//iterate over each partition
 			{
 				Map<Long,Double> newNodeWithItsInsideNode=getNewNodeToPartition(partitions.get(partitionId), nodeIsAssigned);
-				partitions.get(partitionId).addToOnEdgeNodsNode(newNodeWithItsInsideNode.entrySet().iterator().next().getKey());
+				partitions.get(partitionId).addToOnEdgeNodsNode(newNodeWithItsInsideNode.entrySet().iterator().next().getKey(), graph.getNodeByID(newNodeWithItsInsideNode.entrySet().iterator().next().getKey()).getWeight());// add the node and pass its weight (got from teh graph) to be accumulated inside the partition
 				//nodeIsAssigned.put(newNodeWithItsInsideNode.entrySet().iterator().next().getKey(), true);
 				Double insideNode =  newNodeWithItsInsideNode.entrySet().iterator().next().getValue();
 				if(!checkIfNodeOnBorder(insideNode,partitions.get(partitionId),graph))
@@ -103,7 +103,7 @@ public class GrowingPartitioning extends Partitioning{
 			}
 			
 		}
-		candidateWithEdge=new HashMap<>();//euse the variable to send back the maxneighbor node and its corresponding nide in teh partition
+		candidateWithEdge=new HashMap<>();//reuse the variable to send back the max neighbor node and its corresponding node in the partition
 		candidateWithEdge.put(maxNode, (double)focusNode);
 		return candidateWithEdge;
 	}
