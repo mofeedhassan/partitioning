@@ -13,9 +13,9 @@ import java.util.Set;
  *
  */
 public class Pool {
-	
+
 	static Logger log = Logger.getLogger("gpaba");
-	
+
 	// number of individuals
 	private int size;
 
@@ -37,32 +37,38 @@ public class Pool {
 	public void addIndividual(Individual ind) {
 		inds.add(ind);
 	}
-	
+
 	public void removeIndividual(Individual ind) {
 		inds.remove(ind);
 	}
-	
-	public void create() {//the method creates different genomes for individuals and add them to the individual set
+
+	/**
+	 * The method creates different genomes for individuals and add them to the
+	 * individual set.
+	 */
+	public void create() {
 
 		ArrayList<String> types = new ArrayList<>();
-		for (char c = 'A'; c <= 'A' + k - 1; c++)//create groups/partitions labels starting from A
+		// create groups/partitions labels starting from A
+		for (char c = 'A'; c <= 'A' + k - 1; c++)
 			types.add(String.valueOf(c));
 
 		log.log(Level.FINE, "types=" + types);
 
 		// for each individual
-		while ( inds.size() < size ) {
+		while (inds.size() < size) {
 			String genome = "";
 			// for each gene
-			for (int j = 0; j < numGenes; j++) {//create a random distributed genes for the genome 
-				String gene = types.get((int) (k * Math.random()));//create random parition selection that the corresponding gene (node) should belongs to
+			for (int j = 0; j < numGenes; j++) {
+				// create random partition selection that the corresponding gene
+				// (node) should belong to
+				String gene = types.get((int) (k * Math.random()));
 				genome += gene;
 			}
-//			long start = System.nanoTime();
-			boolean valid = validate(genome);//check if in the generated genome if each gene is assigned and all gene values (A/B) are represented
-//			System.out.println("runtime="+(System.nanoTime()-start));
-			if(!valid) {
-				log.log(Level.FINE, "rejected: "+genome);
+			//
+			boolean valid = validate(genome);
+			if (!valid) {
+				log.log(Level.FINE, "rejected: " + genome);
 				continue;
 			}
 			Individual ind = new Individual(genome);
@@ -71,7 +77,7 @@ public class Pool {
 		}
 
 	}
-	
+
 	/**
 	 * Alternative implementation of validate.
 	 * 
@@ -82,27 +88,33 @@ public class Pool {
 		OfInt chr = genome.chars().iterator();
 		Set<Integer> set = new HashSet<>();
 		int cnt = 0;
-		while(chr.hasNext()) {
+		while (chr.hasNext()) {
 			// record that the value is present
-			if(set.add(chr.next()))
+			if (set.add(chr.next()))
 				cnt++;
-			if(cnt == k)
+			if (cnt == k)
 				return true;
 		}
 		// if it gets here, all genes have been visited
 		return false;
 	}
 
-
+	/**
+	 * Check if in the generated genome if each gene is assigned and all gene
+	 * values (A, B, ...) are represented
+	 * 
+	 * @param genome
+	 * @return
+	 */
 	public boolean validate(String genome) {
 		OfInt chr = genome.chars().iterator();
-		boolean[] valid = new boolean[k]; 
-		ext: while(chr.hasNext()) {
+		boolean[] valid = new boolean[k];
+		ext: while (chr.hasNext()) {
 			// record that the value is present
 			valid[chr.next() - (int) 'A'] = true;
-			for(boolean v : valid)
-				// if a value is still not present, check next gene 
-				if(!v)
+			for (boolean v : valid)
+				// if a value is still not present, check next gene
+				if (!v)
 					continue ext;
 			// if it gets here, all values are present
 			return true;
@@ -114,7 +126,7 @@ public class Pool {
 	public List<Individual> getIndividuals() {
 		return inds;
 	}
-	
+
 	public int getSize() {
 		return size;
 	}
@@ -126,6 +138,5 @@ public class Pool {
 	public int getNumGenes() {
 		return numGenes;
 	}
-
 
 }

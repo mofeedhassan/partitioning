@@ -1,7 +1,10 @@
-package org.aksw.gpaba;
+package org.aksw.gpaba.genetic;
 
 import java.util.HashSet;
 import java.util.Set;
+
+import org.aksw.gpaba.Node;
+import org.aksw.gpaba.Partition;
 
 /**
  * @author Tommaso Soru {@literal tsoru@informatik.uni-leipzig.de}
@@ -10,6 +13,7 @@ import java.util.Set;
 public class GeneticPartition implements Partition {
 	
 	private Set<Node> nodes;
+	private int weight = 0; 
 
 	public Set<Node> getNodes() {
 		return nodes;
@@ -22,6 +26,7 @@ public class GeneticPartition implements Partition {
 	
 	public void addNode(Node n) {
 		nodes.add(n);
+		weight += n.getWeight();
 	}
 
 	@Override
@@ -31,14 +36,12 @@ public class GeneticPartition implements Partition {
 
 	@Override
 	public int getNumberOfNodes() {
-		// TODO Auto-generated method stub
 		return nodes.size();
 	}
 
 	@Override
 	public int getSumOfNodesWeights() {
-		// TODO Auto-generated method stub
-		return 0;
+		return weight;
 	}
 	
 	
