@@ -1,5 +1,6 @@
 package org.aksw.weight;
 
+import org.aksw.gpaba.Partition;
 import java.util.Set;
 
 public class UFPartition implements Partition {
