@@ -29,14 +29,15 @@ public class GPABAMain {
 	public static void main(String[] args) throws FileNotFoundException {
 		
 		Algorithm algorithm = Algorithm.GENETIC;
+		String file = "graph10k";
 		log.log(Level.INFO, "The partition algorithm is {0}",algorithm);
-		runAlgorithm(algorithm);
+		runAlgorithm(algorithm, file);
 
 	}
-	public static void runAlgorithm(Algorithm algorithm)
+	public static void runAlgorithm(Algorithm algorithm, String file)
 	{
 		int k = 4;
-		Graph g=loadGraph();
+		Graph g=loadGraph(file);
 		if(g!=null && k <= g.size())
 		{
 			System.out.println(g);
@@ -103,10 +104,8 @@ public class GPABAMain {
 
 		
 	}*/
-	private static Graph loadGraph()
+	private static Graph loadGraph(String file)
 	{
-		String file = "graph1k";
-
 		Graph g=null;
 		try {
 			g = FileParser.load(file);
