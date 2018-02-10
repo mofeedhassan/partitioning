@@ -60,9 +60,6 @@ public class FileParser {
 		
 		return g;
 	}
-	
-	public static void store(Graph g, String file)	{
-		
-	}
+
 
 }
