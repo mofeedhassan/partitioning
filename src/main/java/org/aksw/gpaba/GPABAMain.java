@@ -59,7 +59,7 @@ public class GPABAMain {
 			Set<Partition> parts = gp.compute();
 			
 			log.log(Level.INFO, "The end time = {0}",System.currentTimeMillis());
-			log.log(Level.INFO, "The elapsed time = {0} Seconds", (System.currentTimeMillis() - startTime)/1000);
+			log.log(Level.INFO, "The elapsed time = {0} milliseconds", (System.currentTimeMillis() - startTime));
 			log.log(Level.INFO, "The Number of nodes per partition ");
 			int i=1;
 			for (Partition partition : parts) {
