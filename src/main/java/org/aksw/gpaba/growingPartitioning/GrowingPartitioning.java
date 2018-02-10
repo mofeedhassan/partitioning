@@ -13,8 +13,8 @@ import org.aksw.gpaba.Graph;
 import org.aksw.gpaba.Node;
 import org.aksw.gpaba.Partition;
 import org.aksw.gpaba.Edge;
-import org.aksw.gpaba.GeneticPartition;
 import org.aksw.gpaba.Partitioning;
+import org.aksw.gpaba.genetic.GeneticPartition;
 
 public class GrowingPartitioning extends Partitioning{
 

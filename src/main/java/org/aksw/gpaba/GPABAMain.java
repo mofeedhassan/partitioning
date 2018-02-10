@@ -65,7 +65,8 @@ public class GPABAMain {
 			log.log(Level.INFO, "The Number of nodes per partition ");
 			int i=1;
 			for (Partition partition : parts) {
-				log.log(Level.INFO, "The partition number "+(i++)+" has {0} Nodes",partition.getNumberOfNodes());
+				log.log(Level.INFO, "The partition number "+(i++)+" has {0} Nodes and weighs {1}",
+						new Object[]{partition.getNumberOfNodes(), partition.getSumOfNodesWeights()});
 			}
 			
 		}

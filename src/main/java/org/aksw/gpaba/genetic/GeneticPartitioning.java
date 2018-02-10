@@ -17,7 +17,6 @@ import org.aksw.gpaba.Edge;
 import org.aksw.gpaba.Graph;
 import org.aksw.gpaba.Node;
 import org.aksw.gpaba.Partition;
-import org.aksw.gpaba.GeneticPartition;
 import org.aksw.gpaba.Partitioning;
 import org.aksw.gpaba.util.MapUtil;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
