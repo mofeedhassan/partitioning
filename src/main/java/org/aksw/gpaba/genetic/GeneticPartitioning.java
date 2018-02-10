@@ -30,15 +30,17 @@ public class GeneticPartitioning extends Partitioning {
 
 	static Logger log = Logger.getLogger("gpaba");
 	
-	public static final int POP_SIZE = 50;
-	public static final int EPOCHS = 100; // [1, N]
+	public static final int POP_SIZE = 50; // [1, Inf)
+	public static final int EPOCHS = 100; // [1, Inf)
 	
 	public static final double SELECTION = 0.8; // [0.0, 1.0]
-	public static final double MUTATION = 0.1;
+	public static final double MUTATION = 0.1; // [0.0, 1.0]
 	
 	// for fitness estimation
 	private double costFitExpValue = Double.NaN;
 	private double balanceFitExpValue = Double.NaN;
+	
+	private boolean traceFitness = false;
 
 	public GeneticPartitioning(Graph graph, int k) {
 		super(graph, k);
@@ -53,29 +55,36 @@ public class GeneticPartitioning extends Partitioning {
 	public Set<Partition> compute() {
 
 		PrintWriter bestFitnessWriter = null;
-		try {
-			bestFitnessWriter = new PrintWriter(new File("best_fitness.tsv"));
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+		if (traceFitness) {
+			try {
+				bestFitnessWriter = new PrintWriter(new File("best_fitness.tsv"));
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
 		}
 		
 		// build pool
 		Pool pool = new Pool(POP_SIZE, k, graph.getNodes().size());
-		pool.create();//create set/pool of individuals
-		Map<Individual, Double> map = fit(pool);//calculate for the individuals their min-cut cost,, balance cost then fitness values, 
+		// create set/pool of individuals
+		pool.create();
+		// calculate for the individuals their min-cut cost,, balance cost then fitness values,
+		Map<Individual, Double> map = fit(pool); 
 		print(map, 1);
-		bestFitnessWriter.println("1\t" + getBestIndividual(map).getFitness() + "\t" +
+		if(traceFitness) {
+			bestFitnessWriter.println("1\t" + getBestIndividual(map).getFitness() + "\t" +
 				getAverageFitness(map));
+		}
 		
 		
-		// apply genetic operators
-		for (int epoch = 2; epoch <= EPOCHS; epoch++) {//epoch = generations level
+		// apply genetic operators; epoch = generations level
+		for (int epoch = 2; epoch <= EPOCHS; epoch++) {
 			
 			// natural selection = best population survives
 			naturalSelection(pool);
 			
 			// newborns
-			int newborns = pool.getSize() - pool.getIndividuals().size();//number of empt places in the pool to get new born genes
+			// number of empt places in the pool to get new born genes
+			int newborns = pool.getSize() - pool.getIndividuals().size();
 			log.log(Level.FINE, "newborns: " + newborns);
 			
 			// for each newborn
@@ -89,7 +98,8 @@ public class GeneticPartitioning extends Partitioning {
 						parent2.getGenome().substring(randCut);
 				
 				// mutation
-				if(Math.random() < MUTATION) {//based on randomization, will the new born be mutated or not
+				if(Math.random() < MUTATION) {
+					// based on randomization, will the new born be mutated or not
 					int randGene = (int)(pool.getNumGenes() * Math.random());
 					int randType = (int)(pool.getK() * Math.random());
 					char newGene = (char)(randType + 'A');
@@ -111,8 +121,10 @@ public class GeneticPartitioning extends Partitioning {
 
 			map = fit(pool);
 			print(map, epoch);
-			bestFitnessWriter.println(epoch + "\t" + getBestIndividual(map).getFitness() + "\t" +
-					getAverageFitness(map));
+			if(traceFitness) {
+				bestFitnessWriter.println(epoch + "\t" + getBestIndividual(map).getFitness() + "\t" +
+						getAverageFitness(map));
+			}
 			
 		}
 		
@@ -126,16 +138,25 @@ public class GeneticPartitioning extends Partitioning {
 		
 		// assign nodes to partitions
 		for (int i=0; i<best.getGenome().length(); i++) {
-//			Node ith = getIthNode(i, graph.getNodes());
 			Node ith = graph.getNodeByID((long)(i + 1)); // they start from 1
 			((GeneticPartition) parts.get(best.getGenome().charAt(i))).addNode( ith );
 		}
 		
-		bestFitnessWriter.close();
+		if (traceFitness) {
+			bestFitnessWriter.close();
+		}
 
 		return new HashSet<>(parts.values());
 	}
 	
+	public boolean isTraceFitness() {
+		return traceFitness;
+	}
+
+	public void setTraceFitness(boolean traceFitness) {
+		this.traceFitness = traceFitness;
+	}
+
 	private double getAverageFitness(Map<Individual, Double> map) {
 		double avg = 0.0;
 		for(Double v : map.values())
@@ -147,7 +168,8 @@ public class GeneticPartitioning extends Partitioning {
 		return map.keySet().iterator().next();
 	}
 
-	private void naturalSelection(Pool pool) {//kill ind having less than x fitness
+	private void naturalSelection(Pool pool) {
+		// individual having less than x fitness does not survive
 		int quantile = 0;
 		Set<Individual> dying = new HashSet<>();
 		for(Individual ind : sort(pool).keySet()) {
@@ -212,7 +234,8 @@ public class GeneticPartitioning extends Partitioning {
 				if (part1 != part2)
 					costFitness += e.getWeight();
 			}
-			costFits.add(costFitness);//cost fitness is the total weight between each partition (cut total cost)
+			// cost fitness is the total weight between each partition (cut total cost)
+			costFits.add(costFitness);
 			ind.setCostFitness(costFitness);
 			
 			// compute node-related fitness (balancing)
@@ -233,18 +256,20 @@ public class GeneticPartitioning extends Partitioning {
 			log.log(Level.FINE, "--");
 			
 		}
-		//get average min-cut cost
 		if(Double.isNaN(costFitExpValue)) {
+			// get average min-cut cost
 			costFitExpValue = mean.evaluate(toDouble(costFits));
 			log.log(Level.FINE, "costFitExpValue="+costFitExpValue);
 		}
-		if(Double.isNaN(balanceFitExpValue)) {//get averae balance cost
+		if(Double.isNaN(balanceFitExpValue)) {
+			// get averae balance cost
 			balanceFitExpValue = mean.evaluate(toDouble(balanceFits));
 			log.log(Level.FINE, "balanceFitExpValue="+balanceFitExpValue);
 		}
-		//normalize
+		// normalize
 		for(Individual ind : pool.getIndividuals()) {
-			ind.setCostFitness(ind.getCostFitness() / costFitExpValue);//in both setcost and balance the fitness is updated
+			// in both setcost and balance the fitness is updated
+			ind.setCostFitness(ind.getCostFitness() / costFitExpValue);
 			ind.setBalanceFitness(ind.getBalanceFitness() / balanceFitExpValue);
 			map.put(ind, ind.getFitness());
 		}
@@ -256,7 +281,7 @@ public class GeneticPartitioning extends Partitioning {
 	private double[] toDouble(List<Double> doubles) {
 		 double[] target = new double[doubles.size()];
 		 for (int i = 0; i < target.length; i++) {
-		    target[i] = doubles.get(i).doubleValue();  // java 1.4 style
+//		    target[i] = doubles.get(i).doubleValue();  // java 1.4 style
 		    // or:
 		    target[i] = doubles.get(i);                // java 1.5+ style (outboxing)
 		 }
