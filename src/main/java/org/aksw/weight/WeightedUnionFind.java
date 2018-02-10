@@ -59,10 +59,11 @@ public class WeightedUnionFind {
 		return new HashSet<>(result.values());
 	}
 
-	public static Set<Set<String>> partitions(Map<PTSPNode, Set<PTSPNode>> pairs, int pThreshold) {
+	public static Set<UFPartition> partitions(Map<PTSPNode, Set<PTSPNode>> pairs, int pThreshold) {
+		Set<UFPartition> ret = new HashSet<UFPartition>();
 		Set<Set<String>> setPartitions = new HashSet<Set<String>>();
 		int sumWeight = 0;
-		WeightedUnionFind groups = new WeightedUnionFind();
+		UnionFind groups = new UnionFind();
 		for (Map.Entry<PTSPNode, Set<PTSPNode>> entry : pairs.entrySet()) {
 			PTSPNode first = entry.getKey();
 			if (first.getWeight() >= pThreshold) {
@@ -77,7 +78,7 @@ public class WeightedUnionFind {
 					groups.union(pair, new PTSPNode("", 0));
 					
 					setPartitions.addAll(groups.getPartitions());
-					groups = new WeightedUnionFind();
+					groups = new UnionFind();
 					groups.union(first, new PTSPNode("", 0));
 					continue;
 				}
@@ -86,14 +87,46 @@ public class WeightedUnionFind {
 				sumWeight = +(first.getWeight() + pair.getWeight());
 				if (sumWeight >= pThreshold) {
 					setPartitions.addAll(groups.getPartitions());
-					groups = new WeightedUnionFind();
+					groups = new UnionFind();
 				}
 			}
 		}
 		if (sumWeight < pThreshold) {
 			setPartitions.addAll(groups.getPartitions());
 		}
-		return setPartitions;
+		ret = transformUFpartition(setPartitions, pairs);
+		
+		return ret;
+	}
+	
+	private static Set<UFPartition> transformUFpartition(Set<Set<String>> setPartitions, Map<PTSPNode, Set<PTSPNode>> graph) {
+		Set<UFPartition> ret = new HashSet<UFPartition>();
+		for (Set<String> sPartition : setPartitions) {
+			Set<PTSPNode> sNodes = new HashSet<>();
+			for (String node : sPartition) {
+				PTSPNode pNode = null;
+				
+				for (Map.Entry<PTSPNode, Set<PTSPNode>> entry : graph.entrySet()) {
+					if(entry.getKey().getLabel().equals(node)){
+						pNode = entry.getKey();
+						break;
+					}else{
+						for (PTSPNode ptspNode : entry.getValue()) {
+							if(ptspNode.getLabel().equals(node)){
+								pNode = ptspNode;
+								break;
+							}
+						}
+					}
+				}
+				if(pNode != null)
+					sNodes.add(pNode);
+			}
+			UFPartition ufPart = new UFPartition(sNodes);
+			ret.add(ufPart);
+		}
+		
+		return ret;
 	}
 
 	public static void main(String[] args) {
@@ -118,9 +151,9 @@ public class WeightedUnionFind {
 		int threshold = 3;
 		System.out.println("Input: " + graph);
 		System.out.println("Output: " + partitions(graph, threshold));
-		Set<Set<String>> ps = partitions(graph, threshold);
-		for (Set<String> set : ps) {
-			System.out.println(set);
+		Set<UFPartition> ps = partitions(graph, threshold);
+		for (UFPartition partition : ps) {
+			System.out.println(partition);
 		}
 	}
 }
