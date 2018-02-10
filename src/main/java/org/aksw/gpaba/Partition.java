@@ -11,5 +11,5 @@ public interface Partition {
 	 * calculates the total size of the graph in terms of the total size of its nodes
 	 * @return total size of the graph
 	 */
-	int getPartitionsize(); //
+	int getSumOfNodesWeights(); //
 }

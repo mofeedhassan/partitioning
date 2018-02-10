@@ -51,7 +51,7 @@ public class GrowingPartition  implements Partition{
 		return nodesOnEDge.size()+nodesNotOnEdge.size();
 	}
 	@Override
-	public int getPartitionsize() {
+	public int getSumOfNodesWeights() {
 		// TODO Auto-generated method stub
 		return 0;
 	}

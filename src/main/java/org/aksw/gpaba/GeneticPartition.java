@@ -32,7 +32,7 @@ public class GeneticPartition implements Partition {
 	}
 
 	@Override
-	public int getPartitionsize() {
+	public int getSumOfNodesWeights() {
 		// TODO Auto-generated method stub
 		return 0;
 	}
