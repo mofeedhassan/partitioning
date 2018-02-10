@@ -214,12 +214,11 @@ public class GeneticPartitioning extends Partitioning {
 		TreeMap<Individual, Double> map = new TreeMap<>();
 		StandardDeviation stdev = new StandardDeviation();
 		Mean mean = new Mean();
-
-		ArrayList<Double> costFits = new ArrayList<>();
-		ArrayList<Double> balanceFits = new ArrayList<>();
 		
 		// for each individual...
-		for (Individual ind : pool.getIndividuals()) {
+		pool.getIndividuals().parallelStream().forEach(ind -> {
+			
+//		for (Individual ind : pool.getIndividuals()) {
 			String genome = ind.getGenome();
 			double costFitness = 0;
 			
@@ -235,7 +234,7 @@ public class GeneticPartitioning extends Partitioning {
 					costFitness += e.getWeight();
 			}
 			// cost fitness is the total weight between each partition (cut total cost)
-			costFits.add(costFitness);
+			
 			ind.setCostFitness(costFitness);
 			
 			// compute node-related fitness (balancing)
@@ -250,12 +249,21 @@ public class GeneticPartitioning extends Partitioning {
 			}
 			// graph balance is inv.prop. to partition weight variance
 			double balanceFitness = stdev.evaluate(partWeights);
-			balanceFits.add(balanceFitness);
+			
 			ind.setBalanceFitness(balanceFitness);
 			log.log(Level.FINE, String.valueOf(balanceFitness));
 			log.log(Level.FINE, "--");
 			
+		});
+//		}
+		
+		ArrayList<Double> costFits = new ArrayList<>();
+		ArrayList<Double> balanceFits = new ArrayList<>();
+		for (Individual ind : pool.getIndividuals()) {
+			costFits.add(ind.getCostFitness());
+			balanceFits.add(ind.getBalanceFitness());
 		}
+		
 		if(Double.isNaN(costFitExpValue)) {
 			// get average min-cut cost
 			costFitExpValue = mean.evaluate(toDouble(costFits));
