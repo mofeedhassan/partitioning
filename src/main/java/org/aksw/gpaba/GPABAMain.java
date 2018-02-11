@@ -25,10 +25,20 @@ public class GPABAMain {
 	public enum Algorithm{
 		GENETIC,GROWING,UNIONFIND
 	}
-
+	static Algorithm algorithm1 = null;
+	static String graphFile ="";
+	static String partitionsInfoFile="";
+	
+	private static void loadParamaeters(String[] args)
+	{
+		algorithm1 =Algorithm.valueOf(args[0]);
+		graphFile = args[1];
+		partitionsInfoFile = args[2];
+	}
+	
 	public static void main(String[] args) throws FileNotFoundException {
 		
-		Algorithm algorithm = Algorithm.GENETIC;
+		Algorithm algorithm = Algorithm.GROWING;
 		String file = "graph10k";
 		log.log(Level.INFO, "The partition algorithm is {0}",algorithm);
 		runAlgorithm(algorithm, file);
