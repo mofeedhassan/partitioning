@@ -69,6 +69,7 @@ public class GPABAMain {
 				log.log(Level.INFO, "The partition number "+(i++)+" has {0} Nodes and weighs {1}",
 						new Object[]{partition.getNumberOfNodes(), partition.getSumOfNodesWeights()});
 			}
+			// TODO write total cost
 			
 		}
 	}
